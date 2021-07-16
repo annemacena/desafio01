@@ -46,7 +46,7 @@ app.get('/todos', checksExistsUserAccount, (request, response) => {
 
 app.post('/todos', checksExistsUserAccount, (request, response) => {
   const { username } = request.headers;
-  const { title, deadline } = request;
+  const { title, deadline } = request.body;
 
   const uuid = uuidv4();
 
@@ -62,7 +62,16 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
 });
 
 app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const { username } = request.headers;
+  const { id } = request.params;
+  const { title, deadline } = request.body;
+
+  const todoIndex = users[username].todos.findIndex((todo) => todo.id === id);
+
+  users[username].todos[todoIndex].deadline = new Date(deadline);
+  users[username].todos[todoIndex].title = title;
+
+  response.sendStatus(204);
 });
 
 app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
