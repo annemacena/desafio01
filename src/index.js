@@ -11,7 +11,16 @@ app.use(express.json());
 const users = {}; // O(1)
 
 function checksExistsUserAccount(request, response, next) {
-  // Complete aqui
+  const { username } = request.headers;
+
+  const user = users[username];
+
+  if(user) {
+    return next();
+  }
+  else {
+    return response.status(400).json({ error: "Usuário inválido (￢_￢)" });
+  }
 }
 
 app.post('/users', (request, response) => {
@@ -19,22 +28,37 @@ app.post('/users', (request, response) => {
 
   const uuid = uuidv4();
 
-  users[uuid] = { 
+  users[username] = { 
     name, 
     username, 
     todos: [], 
     id: uuidv4() 
   };
 
-  response.status(201).json({ uuid, message: "Usuário criado °˖✧◝(⁰▿⁰)◜✧˖°"});
+  response.status(201).json({ uuid, username, message: "Usuário criado °˖✧◝(⁰▿⁰)◜✧˖°"});
 });
 
 app.get('/todos', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const { username } = request.headers;
+
+  return response.status(200).json({ todos: users[username].todos });
 });
 
 app.post('/todos', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const { username } = request.headers;
+  const { title, deadline } = request;
+
+  const uuid = uuidv4();
+
+  users[username].todos.push({ 
+    id: uuid,
+    title,
+    done: false, 
+    deadline: new Date(deadline), 
+    created_at: new Date()
+  })
+
+  response.status(201).json({ uuid, message: "To-Do criado (*￣▽￣)b"});
 });
 
 app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
